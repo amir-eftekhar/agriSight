@@ -44,10 +44,13 @@ export default function DetectPage() {
             mimeType: mimeType,
           },
         };
-        analysis = await analyzeDisease(imagePart, detectionResult);
+        const geminiAnalysis = await analyzeDisease(imagePart, detectionResult);
+        
+        // Use Gemini analysis if available, otherwise use fallback
+        analysis = geminiAnalysis || generateMockAnalysis(detectionResult);
       } catch (geminiError) {
         console.error('Gemini analysis error:', geminiError);
-        // Fallback to mock analysis
+        // Silently fallback to mock analysis
         analysis = generateMockAnalysis(detectionResult);
       }
       

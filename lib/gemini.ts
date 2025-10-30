@@ -11,11 +11,13 @@ export const geminiVisionModel = apiKey ? genAI.getGenerativeModel({ model: "gem
 
 export async function analyzeDisease(imagePart: { inlineData: { data: string; mimeType: string } }, diseaseResult: any) {
   if (!geminiVisionModel) {
-    throw new Error("Gemini API key not configured. Please add GEMINI_API_KEY to your environment variables.");
+    console.warn("Gemini API key not configured. Using fallback analysis.");
+    return null; // Return null instead of throwing - caller will use fallback
   }
   
-  const prompt = `You are an expert agricultural pathologist. Analyze this plant leaf image.
-  
+  try {
+    const prompt = `You are an expert agricultural pathologist. Analyze this plant leaf image.
+    
 The ML model detected: ${diseaseResult.disease} with ${diseaseResult.confidence}% confidence.
 
 Provide a comprehensive analysis including:
@@ -27,35 +29,47 @@ Provide a comprehensive analysis including:
 
 Be clear, actionable, and farmer-friendly in your language.`;
 
-  const result = await geminiVisionModel.generateContent([prompt, imagePart]);
-  const response = await result.response;
-  return response.text();
+    const result = await geminiVisionModel.generateContent([prompt, imagePart]);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error("Gemini Vision API error:", error);
+    return null; // Return null on error - caller will use fallback
+  }
 }
 
 export async function chatWithAI(message: string, context?: string) {
   if (!geminiModel) {
-    throw new Error("Gemini API key not configured. Please add GEMINI_API_KEY to your environment variables.");
+    console.warn("Gemini API key not configured. Chat feature unavailable.");
+    return null;
   }
   
-  const chat = geminiModel.startChat({
-    history: [],
-    generationConfig: {
-      maxOutputTokens: 2000,
-    },
-  });
+  try {
+    const chat = geminiModel.startChat({
+      history: [],
+      generationConfig: {
+        maxOutputTokens: 2000,
+      },
+    });
 
-  const prompt = context 
-    ? `Context: ${context}\n\nUser question: ${message}\n\nProvide a helpful, accurate answer about agriculture, plant diseases, or farming practices. Use markdown formatting, including tables and lists where appropriate. If analyzing data, you can suggest charts and tables.`
-    : `You are an expert agricultural advisor and plant pathologist. Answer this question with detailed, actionable advice: ${message}\n\nUse markdown formatting including:\n- **Bold** for emphasis\n- Tables for comparisons\n- Lists for steps\n- Math notation when needed using LaTeX (e.g., \\(x^2\\) for inline, \\[equation\\] for blocks)\n\nProvide comprehensive, farmer-friendly explanations.`;
+    const prompt = context 
+      ? `Context: ${context}\n\nUser question: ${message}\n\nProvide a helpful, accurate answer about agriculture, plant diseases, or farming practices. Use markdown formatting, including tables and lists where appropriate. If analyzing data, you can suggest charts and tables.`
+      : `You are an expert agricultural advisor and plant pathologist. Answer this question with detailed, actionable advice: ${message}\n\nUse markdown formatting including:\n- **Bold** for emphasis\n- Tables for comparisons\n- Lists for steps\n- Math notation when needed using LaTeX (e.g., \\(x^2\\) for inline, \\[equation\\] for blocks)\n\nProvide comprehensive, farmer-friendly explanations.`;
 
-  const result = await chat.sendMessage(prompt);
-  const response = await result.response;
-  return response.text();
+    const result = await chat.sendMessage(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error("Gemini API error:", error);
+    return null;
+  }
 }
 
 export async function* streamChatResponse(message: string, imageData?: string, context?: string) {
   if (!geminiModel) {
-    throw new Error("Gemini API key not configured. Please add GEMINI_API_KEY to your environment variables.");
+    console.warn("Gemini API key not configured. Streaming unavailable.");
+    yield "I apologize, but the AI service is currently unavailable. Please check back later or contact support.";
+    return;
   }
 
   const prompt = context 
