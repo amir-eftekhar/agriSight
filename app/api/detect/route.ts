@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
         },
       };
 
-      aiAnalysis = await analyzeDisease(imagePart, detectionResult);
+      const geminiResult = await analyzeDisease(imagePart, detectionResult);
+      aiAnalysis = geminiResult || 'AI analysis temporarily unavailable. Please refer to the detection results.';
     } catch (error) {
       console.error('Gemini API error:', error);
       // Continue even if Gemini fails
