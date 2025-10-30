@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle, Activity } from "lucide-react";
 import { DetectionResult } from "@/lib/modelHandler";
 import { cn } from "@/lib/utils";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 interface ResultCardProps {
   result: DetectionResult;
@@ -84,9 +85,7 @@ export default function ResultCard({ result, aiAnalysis, imageUrl }: ResultCardP
           </CardHeader>
           <CardContent>
             <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-wrap text-gray-700">
-                {aiAnalysis}
-              </div>
+              <MarkdownRenderer content={aiAnalysis} />
             </div>
           </CardContent>
         </Card>
